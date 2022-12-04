@@ -1,0 +1,175 @@
+# import random
+# import pandas as pd
+import numpy as np
+import math
+
+
+## Calculate information entropy
+
+
+def entropys(words_n_counts, touple_size, word_count):
+    size = word_count+1-touple_size
+    entropys = {}
+    for word, count in words_n_counts.items():
+        entropy = -count/size*np.log10(count/size)
+        entropys.update({word: entropy})
+    return entropys
+
+
+def conditional_entropy_for_letters(words_n_counts, words_n_counts_minus_1, max_touple_size, word_count):
+    sum = 0
+    size = word_count+1-max_touple_size
+    cond_entropys = {}
+    for word_tup, count_tup in words_n_counts.items():
+        if(not(word_tup[:-1] in cond_entropys)):
+            cond_entropys.update({word_tup[:-1]: []})
+        # if(word_tup == 'ale'):
+        #     print(word_tup)
+        #print(word_tup, word_tup[:-1])
+        for word, count in words_n_counts_minus_1.items():
+            if word_tup[:-1]==word:
+                # if(word == 'al'):
+                #     print(word, word_tup)
+                #if(word_tup == 'lbe'):
+                    #print(count_tup, pij_pi(count, word_count, count_tup, max_touple_size), np.log10(pij_pi(count, word_count, count_tup, max_touple_size)), "NOW", count, word_count, count_tup, max_touple_size)
+                cond_entropy = -(count_tup/size)*np.log10(pij_pi(count, word_count, count_tup, max_touple_size))  # dl tupla - calego czyli ij
+                cond_entropys[word_tup[:-1]].append([word_tup[-1], cond_entropy])
+                sum += cond_entropy
+    #print(cond_entropys)
+    return cond_entropys, sum
+
+def conditional_entropy_for_words(words_n_counts, words_n_counts_minus_1, max_touple_size, word_count):
+    sum = 0
+    size = word_count+1-max_touple_size
+    cond_entropys = {}
+    for word_tup, count_tup in words_n_counts.items():
+        word_tupo = word_tup.split()
+
+        if(not(" ".join(word_tupo[:-1]) in cond_entropys)):
+            cond_entropys.update({" ".join(word_tupo[:-1]): []})
+
+        #print(word_tup, word_tup[:-1])
+        for word, count in words_n_counts_minus_1.items():
+            wordo = word.split()
+            if word_tupo[:-1]==wordo:
+                cond_entropy = -count_tup/size*np.log10(pij_pi(count, word_count, count_tup, max_touple_size))  # dl tupla - calego czyli ij
+                cond_entropys[" ".join(word_tupo[:-1])].append([word_tupo[-1], cond_entropy])
+                sum += cond_entropy
+    print(cond_entropys)
+    return cond_entropys, sum
+
+
+def count_words_in_txt(txt):
+    all_words = txt.split()
+    # initialize a null list
+    words_dict = {}
+    # traverse for all elements
+    for x in all_words:
+        # check if exists in unique_list or not
+        if x in words_dict:
+            words_dict[x] += 1
+        if x not in words_dict:
+            words_dict.update({x: 1})
+    return words_dict
+
+
+def read_txt(path):
+    with open('C:/Users/PC/Desktop/7th sem/TI/lab3/zad/' + path) as f:
+        lines = f.readlines()
+    return lines
+
+
+def pij_pi(ile_x_i, len_txt, ile_x_ij, dl_ij):  # dl tupla - calego czyli ij
+    pij = ile_x_ij / (len_txt - (dl_ij - 2))    #len-2 =14
+    pi = ile_x_i / (len_txt - (dl_ij - 1))      #len-1 = 15
+
+    if (pij == 0):
+        return 0
+    else:
+        pij_pi = pij / pi  # p_ijkl_pijk = pijk/ p_ijkl
+    return pij_pi  # p_ijkl = ile_x_ijkl/len_ciagu-3
+    # pijk = ile_x_ijk/len_ciagu-2
+
+
+def count_word_tuples_in_txt(txt, tuple_size):
+    tuples_n_counts = {}  # {'albert of': 1}
+    txt = txt[0]
+
+    #print(txt, len(txt))
+    txt_list = txt.split()
+    size = len(txt)
+    #print("len", len(txt))
+    for i in range(min(len(txt), 10000)):
+        words = ""
+        for word in txt_list[i:i + tuple_size]:
+            words += word + " "
+        words = words[:-1]
+        if words in tuples_n_counts:
+            tuples_n_counts[words] += 1
+        else:
+            tuples_n_counts.update({words: 1})
+        if i == 999:
+            words = words.split()
+            words.pop(0)
+            words = ' '.join(words)
+            last_tuple = words
+    return tuples_n_counts, size  # , last_tuple
+
+def count_letter_tuples_in_txt(txt, tuple_size):
+    tuples_n_counts = {}  # {'albert of': 1}
+    txt = txt[0]
+    size = len(txt)
+    #print("len", len(txt))
+    for i in range(min(len(txt), 10000)):
+        words = ""
+        for word in txt[i:i + tuple_size]:  #txt_list
+            #print(word)
+            words += word
+        words = words#[:-1]
+        if words in tuples_n_counts:
+            tuples_n_counts[words] += 1
+            #print(word, tuples_n_counts[words])
+        else:
+            tuples_n_counts.update({words: 1})
+        # if i == 999:
+        #     words = words.split()
+        #     words.pop(0)
+        #     words = ' '.join(words)
+        #     last_tuple = words
+    return tuples_n_counts, size  # , last_tuple
+
+
+
+def letter_entropy(letter_count, size):
+    letter_entropy = {}
+    for letter, count in letter_count:
+        entropy = letter  #change this
+
+
+
+
+if __name__ == '__main__':
+    txt = read_txt("../data/sample0.txt") #"norm_wiki_en.txt")  #
+    # print(txt)
+    txt_list = txt[0].split()
+    letters_size = len(txt[0])
+    words_size = len(txt_list)
+    #print(letters_size, words_size)
+
+    word_count, size = count_word_tuples_in_txt(txt, 5)     #one word (tuple size)
+    word_count_minus1, size = count_word_tuples_in_txt(txt, 4)
+    #
+    # letter_count, size = count_letter_tuples_in_txt(txt, 5)
+    # letter_count_minus1, size = count_letter_tuples_in_txt(txt, 4)
+
+
+    #word_count2, size = count_word_tuples_in_txt(txt, 2)
+    #print(size, letter_count)#word_count)
+    #entropys = entropys(word_count, 2, words_size)
+    #entropys = entropys(letter_count1, 2, letters_size)
+    #print(entropys)
+
+    #letter_cond_entropys, all_around_letters = conditional_entropy_for_letters(letter_count, letter_count_minus1, 5, letters_size)
+    #print(letter_cond_entropys, "\n", all_around_letters)
+    word_cond_entropys, all_around_words = conditional_entropy_for_words(word_count, word_count_minus1, 3, words_size)
+    print(word_cond_entropys, all_around_words)
